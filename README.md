@@ -5,7 +5,7 @@ This repo contains the "slides" for showing how promises can improve code. It st
 
 Each slide is tagged.
 
-Slide 1:
+## Slide 1:
 
  * Flickr.searchFlickrForTerm(_: completion) is a long function. One-hundered, elven lines total (including white space to keep it neat.) The bulk of this function is a single closure that is 100 lines long.
  * It uses a completion block to "return" its results. The block has both `results` and `error` optional parameters.
@@ -14,8 +14,8 @@ Slide 1:
  * Notice that in completion blocks like this, we can't simply return values, instead we must call the completion handler.
  
 There are three things that you can do inside a function:
- # Return a value
- # Throw an error (if the function is marked `throws`)
- # Perform a side-effect.
+ 1. Return a value
+ 1. Throw an error (if the function is marked `throws`)
+ 1. Perform a side-effect.
  
 In closures we can't really return a value or throw an error. So we are reduced to side-effects... The most error-prone kind of code.
