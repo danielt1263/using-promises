@@ -7,10 +7,10 @@ Each slide is tagged.
 
 ## Slide 1:
 
- * Flickr.searchFlickrForTerm(_: completion) is a long function. One-hundered, elven lines total (including white space to keep it neat.) The bulk of this function is a single closure that is 100 lines long.
+ * Flickr.searchFlickrForTerm(_: completion) is a long function. One-hundred, elven lines total (including white space to keep it neat.) The bulk of this function is a single closure that is 100 lines long.
  * It uses a completion block to "return" its results. The block has both `results` and `error` optional parameters.
  * What if both contain values? What if they are both empty?
- * Look af the first guard clause (line 33). Wouldn't it be nice to throw here? Why can't we?
+ * Look at the first guard clause (line 33). Wouldn't it be nice to throw here? Why can't we?
  * Notice that in completion blocks like this, we can't simply return values, instead we must call the completion handler.
  
 There are three things that you can do inside a function:
