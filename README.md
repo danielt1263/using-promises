@@ -19,3 +19,19 @@ There are three things that you can do inside a function:
  1. Perform a side-effect.
  
 In closures we can't really return a value or throw an error. So we are reduced to side-effects... The most error-prone kind of code.
+
+## Slide 2:
+
+First we need to choose a promise library. 
+
+ * There are several in existence for Swift, some more elaborate than others. 
+ * For this presentation I have chosen one of the smaller ones, a library by Soroush Khanlou called simply, ["Promise"](https://github.com/khanlou/Promise). 
+ * This library is relatively easy to understand. 
+ * We aren't going to do that though, instead we are going to learn how to *use* the library.
+
+A promise is a way to represent a value that may exist at some point in the future. So we can:
+
+ * Easily chain asynchronous operations.
+ * Perform many independent asynchronous operations simultaneously and combine them into one result.
+
+... and more! We will refactor the Flickr code to show this in action.
