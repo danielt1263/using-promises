@@ -35,3 +35,11 @@ A promise is a way to represent a value that may exist at some point in the futu
  * Perform many independent asynchronous operations simultaneously and combine them into one result.
 
 ... and more! We will refactor the Flickr code to show this in action.
+
+## Slide 3:
+
+Now it's time to start using the library. In our first refactoring we will create a new function on URLSession that returns a Promise. We do that by wrapping the dataTask function.
+
+ * Review the Promise initializer and how it has a `work` closure that supplies two other closures, `fulfill: (Value) -> Void` and `reject: (Error) -> Void`.
+ * The Promise class sets up a level of indirection. Now you provide your success closure through a `then` method and the `catch` method is used to handle any error that occurs.
+ * Note the `data` object on line 42 is a `Promise<Data>`. A variable that will hold the data once it comes back from the server and will provide it to any `then` closure that is attached to the promise.

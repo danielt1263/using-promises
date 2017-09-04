@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-	
+
 import UIKit
+import Promise
 
 let apiKey = "da86792bb517cd3b603f4f62de8c3af2"
 
@@ -38,30 +39,13 @@ class Flickr {
     
     let searchRequest = URLRequest(url: searchURL)
     
-    URLSession.shared.dataTask(with: searchRequest, completionHandler: { (data, response, error) in
-      
-      if let _ = error {
-        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-        OperationQueue.main.addOperation({
-          completion(nil, APIError)
-        })
-        return
-      }
-      
-      guard let _ = response as? HTTPURLResponse,
-        let data = data else {
-          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-          OperationQueue.main.addOperation({
-            completion(nil, APIError)
-          })
-          return
-      }
-      
+    let data = URLSession.shared.data(with: searchRequest)
+    
+    data.then { data in
       do {
-        
         guard let resultsDictionary = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [String: AnyObject],
         let stat = resultsDictionary["stat"] as? String else {
-          
+            
           let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
           OperationQueue.main.addOperation({
             completion(nil, APIError)
@@ -87,7 +71,7 @@ class Flickr {
           OperationQueue.main.addOperation({
             completion(nil, APIError)
           })
-  
+          
           return
         default:
           let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
@@ -127,7 +111,7 @@ class Flickr {
             flickrPhotos.append(flickrPhoto)
           }
         }
-              
+        
         OperationQueue.main.addOperation({
           completion(FlickrSearchResults(searchTerm: searchTerm, searchResults: flickrPhotos), nil)
         })
@@ -136,9 +120,14 @@ class Flickr {
         completion(nil, nil)
         return
       }
-      
-      
-      }) .resume()
+    }
+    
+    data.catch { error in
+      let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
+      OperationQueue.main.addOperation({
+        completion(nil, APIError)
+      })
+    }
   }
   
   fileprivate func flickrSearchURLForSearchTerm(_ searchTerm:String) -> URL? {
