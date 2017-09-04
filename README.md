@@ -42,4 +42,10 @@ Now it's time to start using the library. In our first refactoring we will creat
 
  * Review the Promise initializer and how it has a `work` closure that supplies two other closures, `fulfill: (Value) -> Void` and `reject: (Error) -> Void`.
  * The Promise class sets up a level of indirection. Now you provide your success closure through a `then` method and the `catch` method is used to handle any error that occurs.
- * Note the `data` object on line 42 is a `Promise<Data>`. A variable that will hold the data once it comes back from the server and will provide it to any `then` closure that is attached to the promise.
+ * Note the `data` object on line 42 is a `Promise<Data>`. A variable that will hold the data once it comes back from the server and will provide it to any `then` closure that is attached to the promise. If there is an error, the promise will provide that to any closure that is bound to the `catch` method.
+
+## Slide 4:
+
+Here is an example of how promises handle thrown errors. Unlike the callback we are replacing, Promises allow errors to be thrown and will route those errors to the Promise's `catch` block. With promises, we get to use throw again!
+
+ * Notice how everytime we wrap up a type in a promise the level of indentation goes down.

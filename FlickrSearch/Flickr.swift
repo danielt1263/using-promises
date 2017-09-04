@@ -40,86 +40,81 @@ class Flickr {
     let searchRequest = URLRequest(url: searchURL)
     
     let data = URLSession.shared.data(with: searchRequest)
+    let resultsDictionary = data.then { try typeOrThrow(try JSONSerialization.jsonObject(with: $0, options: []), isType: [String: Any].self) }
     
-    data.then { data in
-      do {
-        guard let resultsDictionary = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [String: AnyObject],
-        let stat = resultsDictionary["stat"] as? String else {
-            
-          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-          OperationQueue.main.addOperation({
-            completion(nil, APIError)
-          })
-          return
-        }
+    resultsDictionary.then { resultsDictionary in
+      guard let stat = resultsDictionary["stat"] as? String else {
         
-        switch (stat) {
-        case "ok":
-          print("Results processed OK")
-        case "fail":
-          if let message = resultsDictionary["message"] {
-            
-            let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:message])
-            
-            OperationQueue.main.addOperation({
-              completion(nil, APIError)
-            })
-          }
-          
-          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: nil)
-          
-          OperationQueue.main.addOperation({
-            completion(nil, APIError)
-          })
-          
-          return
-        default:
-          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-          OperationQueue.main.addOperation({
-            completion(nil, APIError)
-          })
-          return
-        }
-        
-        guard let photosContainer = resultsDictionary["photos"] as? [String: AnyObject], let photosReceived = photosContainer["photo"] as? [[String: AnyObject]] else {
-          
-          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-          OperationQueue.main.addOperation({
-            completion(nil, APIError)
-          })
-          return
-        }
-        
-        var flickrPhotos = [FlickrPhoto]()
-        
-        for photoObject in photosReceived {
-          guard let photoID = photoObject["id"] as? String,
-            let farm = photoObject["farm"] as? Int ,
-            let server = photoObject["server"] as? String ,
-            let secret = photoObject["secret"] as? String else {
-              break
-          }
-          let flickrPhoto = FlickrPhoto(photoID: photoID, farm: farm, server: server, secret: secret)
-          
-          guard let url = flickrPhoto.flickrImageURL(),
-            let imageData = try? Data(contentsOf: url as URL) else {
-              break
-          }
-          
-          if let image = UIImage(data: imageData) {
-            flickrPhoto.thumbnail = image
-            flickrPhotos.append(flickrPhoto)
-          }
-        }
-        
+        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
         OperationQueue.main.addOperation({
-          completion(FlickrSearchResults(searchTerm: searchTerm, searchResults: flickrPhotos), nil)
+          completion(nil, APIError)
         })
-        
-      } catch _ {
-        completion(nil, nil)
         return
       }
+      
+      switch (stat) {
+      case "ok":
+        print("Results processed OK")
+      case "fail":
+        if let message = resultsDictionary["message"] {
+          
+          let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:message])
+          
+          OperationQueue.main.addOperation({
+            completion(nil, APIError)
+          })
+        }
+        
+        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: nil)
+        
+        OperationQueue.main.addOperation({
+          completion(nil, APIError)
+        })
+        
+        return
+      default:
+        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
+        OperationQueue.main.addOperation({
+          completion(nil, APIError)
+        })
+        return
+      }
+      
+      guard let photosContainer = resultsDictionary["photos"] as? [String: AnyObject], let photosReceived = photosContainer["photo"] as? [[String: AnyObject]] else {
+        
+        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
+        OperationQueue.main.addOperation({
+          completion(nil, APIError)
+        })
+        return
+      }
+      
+      var flickrPhotos = [FlickrPhoto]()
+      
+      for photoObject in photosReceived {
+        guard let photoID = photoObject["id"] as? String,
+          let farm = photoObject["farm"] as? Int ,
+          let server = photoObject["server"] as? String ,
+          let secret = photoObject["secret"] as? String else {
+            break
+        }
+        let flickrPhoto = FlickrPhoto(photoID: photoID, farm: farm, server: server, secret: secret)
+        
+        guard let url = flickrPhoto.flickrImageURL(),
+          let imageData = try? Data(contentsOf: url as URL) else {
+            break
+        }
+        
+        if let image = UIImage(data: imageData) {
+          flickrPhoto.thumbnail = image
+          flickrPhotos.append(flickrPhoto)
+        }
+      }
+      
+      OperationQueue.main.addOperation({
+        completion(FlickrSearchResults(searchTerm: searchTerm, searchResults: flickrPhotos), nil)
+      })
+      
     }
     
     data.catch { error in
@@ -143,4 +138,17 @@ class Flickr {
     
     return url
   }
+}
+
+func typeOrThrow<T>(_ obj: Any, isType: T.Type) throws -> T {
+  guard let result = obj as? T else { throw BadType(obj: obj, type: T.self) }
+  return result
+}
+
+struct BadType: Error {
+  init<T>(obj: Any, type: T.Type) {
+    localizedDescription = "object \(obj) was not of type \(T.self)"
+  }
+  
+  let localizedDescription: String
 }
