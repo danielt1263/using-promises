@@ -50,4 +50,14 @@ Here is an example of how promises handle thrown errors. Unlike the callback we 
 
  * Notice how everytime we wrap up a type in a promise the level of indentation goes down.
  * Before moving on to the next refactoring, examine the code from lines 46-81. Notice the error. This error couldn't exist if throwing had been allowed.
- 
+
+## Slide 5:
+
+Here we are just checking the validity of the object returned from the JSON parsing.
+
+ * Notice how we can chain `then` methods.
+ * We can also attach the `catch` method to the last `then`.
+ * Here the use of Promises and our ability to use `throw` again, has turned 35 lines of code into 14.
+ * We fixed the error in the code.
+
+
