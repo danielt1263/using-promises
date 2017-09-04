@@ -49,3 +49,4 @@ Now it's time to start using the library. In our first refactoring we will creat
 Here is an example of how promises handle thrown errors. Unlike the callback we are replacing, Promises allow errors to be thrown and will route those errors to the Promise's `catch` block. With promises, we get to use throw again!
 
  * Notice how everytime we wrap up a type in a promise the level of indentation goes down.
+ * Before moving on to the next refactoring, examine the code from lines 46-81.
