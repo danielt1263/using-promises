@@ -29,7 +29,7 @@ class Flickr {
   
   let processingQueue = OperationQueue()
   
-  func searchFlickrForTerm(_ searchTerm: String, completion : @escaping (_ results: FlickrSearchResults?, _ error : NSError?) -> Void){
+  func searchFlickrForTerm(_ searchTerm: String, completion : @escaping (_ results: FlickrSearchResults?, _ error : Error?) -> Void){
     
     guard let searchURL = flickrSearchURLForSearchTerm(searchTerm) else {
       let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
@@ -123,9 +123,8 @@ class Flickr {
     }
     
     data.catch { error in
-      let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
       OperationQueue.main.addOperation({
-        completion(nil, APIError)
+        completion(nil, error)
       })
     }
   }
