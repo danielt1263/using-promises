@@ -36,6 +36,27 @@ class FlickrPhoto : Equatable {
     self.server = server
     self.secret = secret
   }
+	
+  init?(json: [String : Any]) {
+    guard let photoID = json["id"] as? String,
+      let farm = json["farm"] as? Int ,
+      let server = json["server"] as? String ,
+      let secret = json["secret"] as? String else {
+        return nil
+    }
+    self.photoID = photoID
+    self.farm = farm
+    self.server = server
+    self.secret = secret
+    
+    guard let url = flickrImageURL(),
+      let imageData = try? Data(contentsOf: url as URL),
+      let image = UIImage(data: imageData) else {
+        return nil
+    }
+    
+    thumbnail = image
+  }
   
   func flickrImageURL(_ size:String = "m") -> URL? {
     if let url =  URL(string: "https://farm\(farm).staticflickr.com/\(server)/\(photoID)_\(secret)_\(size).jpg") {

@@ -65,4 +65,12 @@ Here we are just checking the validity of the object returned from the JSON pars
 Here we are doing more object extraction.
 
  * Notice how all the `completion(nil, APIError)` calls are getting rolled into the promise's `catch` clause.
- 
+
+
+## Slide 7:
+
+What's left is a loop that goes though the `photosReceived` array and uses it to create a `[FlickerPhoto]` array. In other words, it's a transformation which is exactly what `map` is good for. To make the fact that this code is just doing a data transformation, we have extracted the relevent code into an `init` method.
+
+ * Notice how much cleaner this makes the array.
+ * This particular step doesn't have anything to do with Promises. It's just good practice.
+
