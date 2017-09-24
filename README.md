@@ -60,4 +60,9 @@ Here we are just checking the validity of the object returned from the JSON pars
  * Here the use of Promises and our ability to use `throw` again, has turned 35 lines of code into 14.
  * We fixed the error in the code.
 
+## Slide 6:
 
+Here we are doing more object extraction.
+
+ * Notice how all the `completion(nil, APIError)` calls are getting rolled into the promise's `catch` clause.
+ 

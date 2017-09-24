@@ -59,17 +59,11 @@ class Flickr {
         }
         return resultsDictionary
     }
+
+    let photosContainer = resultsDictionary.then { try typeOrThrow($0["photos"], isType: [String: Any].self) }
+    let photosReceived = photosContainer.then { try typeOrThrow($0["photo"], isType: [[String: Any]].self) }
     
-    resultsDictionary.then { resultsDictionary in
-      guard let photosContainer = resultsDictionary["photos"] as? [String: AnyObject], let photosReceived = photosContainer["photo"] as? [[String: AnyObject]] else {
-        
-        let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-        OperationQueue.main.addOperation({
-          completion(nil, APIError)
-        })
-        return
-      }
-      
+    photosReceived.then { photosReceived in
       var flickrPhotos = [FlickrPhoto]()
       
       for photoObject in photosReceived {
@@ -120,14 +114,14 @@ class Flickr {
   }
 }
 
-func typeOrThrow<T>(_ obj: Any, isType: T.Type) throws -> T {
+func typeOrThrow<T>(_ obj: Any?, isType: T.Type) throws -> T {
   guard let result = obj as? T else { throw BadType(obj: obj, type: T.self) }
   return result
 }
 
 struct BadType: Error {
-  init<T>(obj: Any, type: T.Type) {
-    localizedDescription = "object \(obj) was not of type \(T.self)"
+  init<T>(obj: Any?, type: T.Type) {
+    localizedDescription = "object \(String(describing: obj)) was not of type \(T.self)"
   }
   
   let localizedDescription: String
