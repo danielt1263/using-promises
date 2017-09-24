@@ -42,17 +42,14 @@ class Flickr {
     let data = URLSession.shared.data(with: searchRequest)
     let resultsDictionary = data.then { try typeOrThrow(try JSONSerialization.jsonObject(with: $0, options: []), isType: [String: Any].self) }
       .then { resultsDictionary -> [String: Any] in
-        guard let stat = resultsDictionary["stat"] as? String else { throw BadType(obj: resultsDictionary["state"] ?? "nil", type: String.self) }
+        let stat = try typeOrThrow(resultsDictionary["stat"], isType: String.self)
         switch stat {
         case "ok":
           print("Results processed OK")
           
         case "fail":
-          if let message = resultsDictionary["mesage"] {
+          let message = resultsDictionary["message"] ?? "Unknown API response"
             throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: message])
-          }
-          
-          throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: "Unknown API response"])
           
         default:
           throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: "Unknown API response"])
