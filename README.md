@@ -74,3 +74,12 @@ What's left is a loop that goes though the `photosReceived` array and uses it to
  * Notice how much cleaner this makes the array.
  * This particular step doesn't have anything to do with Promises. It's just good practice.
 
+## Slide 8:
+
+For the final touch, we remove the closure in the `searchFlickrForTerm` method which means we can just return the `FlickrSearchResults` directly in a promise.
+
+ * Notice in the view controller we now have then/catch/always blocks which work very much like do/catch/defer.
+ * Notice that this refactoring cut a full 80 lines of code out of this method and generally made it much easier to understand.
+ * Much of the code savings came from the re-introduction of `throw`, something we weren't able to use in the callback.
+ * Much of the understandability comes from the fact that we were able to define lots of named variables.
+ 

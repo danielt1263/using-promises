@@ -23,18 +23,17 @@
 import UIKit
 import Promise
 
-let apiKey = "da86792bb517cd3b603f4f62de8c3af2"
+let apiKey = "731b6251256d60f600098671a785791a"
 
 class Flickr {
   
   let processingQueue = OperationQueue()
   
-  func searchFlickrForTerm(_ searchTerm: String, completion : @escaping (_ results: FlickrSearchResults?, _ error : Error?) -> Void){
+  func searchFlickrForTerm(_ searchTerm: String) -> Promise<FlickrSearchResults> {
     
     guard let searchURL = flickrSearchURLForSearchTerm(searchTerm) else {
       let APIError = NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey:"Unknown API response"])
-      completion(nil, APIError)
-      return
+      return Promise(error: APIError)
     }
     
     let searchRequest = URLRequest(url: searchURL)
@@ -49,7 +48,7 @@ class Flickr {
           
         case "fail":
           let message = resultsDictionary["message"] ?? "Unknown API response"
-            throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: message])
+          throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: message])
           
         default:
           throw NSError(domain: "FlickrSearch", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: "Unknown API response"])
@@ -58,27 +57,9 @@ class Flickr {
     }
 
     let photosContainer = resultsDictionary.then { try typeOrThrow($0["photos"], isType: [String: Any].self) }
-    let photosReceived = photosContainer.then { try typeOrThrow($0["photo"], isType: [[String: Any]].self) }
-    
-    photosReceived.then { photosReceived in
-      var flickrPhotos = [FlickrPhoto]()
-      
-      for photoObject in photosReceived {
-        if let flickrPhoto = FlickrPhoto(json: photoObject) {
-          flickrPhotos.append(flickrPhoto)
-        }
-      }
-      
-      OperationQueue.main.addOperation({
-        completion(FlickrSearchResults(searchTerm: searchTerm, searchResults: flickrPhotos), nil)
-      })
-      
-    }
-    .catch { error in
-      OperationQueue.main.addOperation({
-        completion(nil, error)
-      })
-    }
+    let photosReceived = photosContainer.then { try typeOrThrow($0["photo"], isType: [[String: Any]].self) }    
+    let flickrPhotos = photosReceived.then { $0.flatMap(FlickrPhoto.init) }
+    return flickrPhotos.then { FlickrSearchResults(searchTerm: searchTerm, searchResults: $0) }
   }
   
   fileprivate func flickrSearchURLForSearchTerm(_ searchTerm:String) -> URL? {
